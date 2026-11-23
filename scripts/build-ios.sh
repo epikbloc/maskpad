@@ -35,4 +35,5 @@ cmake --build "$BUILD" --target 2ship --config Release -- \
     -quiet -sdk "$SDK" CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
 
 test -x "$APP/MaskPad"
+cp "$ROOT/data/mm.o2r" "$APP/"
 echo "$APP"

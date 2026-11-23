@@ -1,0 +1,38 @@
+name: Build MaskPad
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          brew install cmake ninja pkgconf sdl2 glew nlohmann-json \
+            libpng libzip tinyxml2 libogg libvorbis opus opusfile sdl2_net
+
+      - name: Clone sources
+        run: scripts/clone-sources.sh
+
+      - name: Apply patches
+        run: scripts/apply-patches.sh
+
+      - name: Configure
+        run: scripts/configure-ios.sh --device
+
+      - name: Build
+        run: scripts/build-ios.sh --device
+
+      - name: Package IPA
+        run: scripts/package-ios.sh
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: MaskPad
+          path: "*.ipa"   
