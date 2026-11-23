@@ -22,6 +22,9 @@ jobs:
       - name: Apply patches
         run: scripts/apply-patches.sh
 
+      - name: Apply custom changes
+        run: scripts/apply-custom-changes.sh   
+
       - name: Configure
         run: scripts/configure-ios.sh --device
 
@@ -29,7 +32,11 @@ jobs:
         run: scripts/build-ios.sh --device
 
       - name: Package IPA
-        run: scripts/package-ios.sh
+        run: |
+          cd build-ios-device/mm/Release-iphoneos
+          mkdir Payload
+          mv MaskPad.app Payload/
+          zip -r MaskPad.ipa Payload/
 
       - name: Upload
         uses: actions/upload-artifact@v4
