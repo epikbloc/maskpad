@@ -240,7 +240,6 @@ index c9a5ad156..df59c04e6 100644
  #include "2s2h/PresetManager/PresetManager.h"
 +#ifdef __IOS__
 +#include <cstdlib>
-+#include <filesystem>
 +#include <cstring>
 +#include "ios/MaskPadTouchControls.h"
 +#include "ios/MaskPadTouchVisibility.h"
@@ -271,30 +270,12 @@ index c9a5ad156..df59c04e6 100644
 
 -        if (Extractor::ShowYesNoBox("No O2R File", "No O2R files found. Generate one now?") == IDYES) {
 +        bool shouldGenerate =
-#ifdef __IOS__
-            true;
-#else
-            Extractor::ShowYesNoBox("No O2R File", "No O2R files found. Generate one now?") == IDYES;
-#endif
-#ifdef __IOS__
-        // If mm.o2r is bundled in the app, copy it and skip extraction
-        {
-            std::string appDir = Ship::Context::GetAppDirectoryPath(appShortName);
-            std::string o2rDest = appDir + "/mm.o2r";
-            if (!std::filesystem::exists(o2rDest)) {
-                // Get the main bundle path (same dir as the executable)
-                std::string bundlePath = Ship::Context::GetAppDirectoryPath("");
-                std::string o2rBundle = bundlePath + "/mm.o2r";
-                if (std::filesystem::exists(o2rBundle)) {
-                    std::filesystem::copy_file(o2rBundle, o2rDest);
-                    shouldGenerate = false;
-                }
-            } else {
-                shouldGenerate = false;
-            }
-        }
-#endif
-        if (shouldGenerate) {   
++#ifdef __IOS__
++            true;
++#else
++            Extractor::ShowYesNoBox("No O2R File", "No O2R files found. Generate one now?") == IDYES;
++#endif
++        if (shouldGenerate) {
              Extractor extract;
 +#ifdef __IOS__
 +            while (!extract.Run(Ship::Context::GetAppDirectoryPath(appShortName))) {
@@ -318,8 +299,7 @@ index c9a5ad156..df59c04e6 100644
 +    CVarRegisterInteger("gSettings.MaskPad.PhonePerformanceDefaultsV1", 0);
 +    if (Ship::Context::GetInstance()->GetWindow()->GetHeight() < 560 &&
 +        !CVarGetInteger("gSettings.MaskPad.PhonePerformanceDefaultsV1", 0)) {
-+        CVarSetInteger("gInterpolationFPS", 60);
-+        CVarSetFloat(CVAR_INTERNAL_RESOLUTION, 4.0f);
++        CVarSetInteger("gInterpolationFPS", 20);
 +        CVarSetInteger("gSettings.MaskPad.PhonePerformanceDefaultsV1", 1);
 +        CVarSave();
 +    }
