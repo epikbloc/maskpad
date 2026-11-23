@@ -23,7 +23,46 @@ jobs:
         run: scripts/apply-patches.sh
 
       - name: Apply custom changes
-        run: scripts/apply-custom-changes.sh   
+        run: |
+          SRC="sources/2ship2harkinian/mm/2s2h/BenPort.cpp"
+          python3 - "$SRC" << 'PYEOF'
+          import sys
+          filepath = sys.argv[1]
+          with open(filepath, 'r') as f:
+              content = f.read()
+          content = content.replace(
+              '#include <cstdlib>',
+              '#include <cstdlib>\n#include <filesystem>',
+              1
+          )
+          content = content.replace(
+              'CVarSetInteger("gInterpolationFPS", 20);',
+              'CVarSetInteger("gInterpolationFPS", 60);\n        CVarSetFloat(CVAR_INTERNAL_RESOLUTION, 4.0f);'
+          )
+          bundle_code = '''#ifdef __IOS__
+        {
+            std::string _appDir = Ship::Context::GetAppDirectoryPath(appShortName);
+            std::string _o2rDest = _appDir + "/mm.o2r";
+            if (!std::filesystem::exists(_o2rDest)) {
+                std::string _bundleO2r = Ship::Context::GetAppDirectoryPath("") + "/mm.o2r";
+                if (std::filesystem::exists(_bundleO2r)) {
+                    std::filesystem::copy_file(_bundleO2r, _o2rDest);
+                    shouldGenerate = false;
+                }
+            } else {
+                shouldGenerate = false;
+            }
+        }
+          #endif
+          '''
+          content = content.replace(
+              '        if (shouldGenerate) {',
+              bundle_code + '        if (shouldGenerate) {'
+          )
+          with open(filepath, 'w') as f:
+              f.write(content)
+          print("Custom changes applied")
+          PYEOF   
 
       - name: Configure
         run: scripts/configure-ios.sh --device
