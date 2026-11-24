@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on:  macos-15-intel
+    runs-on: macos-15-intel
     steps:
       - uses: actions/checkout@v5
         with:
@@ -19,8 +19,8 @@ jobs:
       - name: Clone sources
         run: scripts/clone-sources.sh
 
-      - name: Apply patches
-        run: scripts/apply-patches.sh
+      - name: Configure (applies patches)
+        run: scripts/configure-ios.sh --device
 
       - name: Apply custom changes
         run: |
@@ -48,9 +48,6 @@ jobs:
           print("Custom changes applied")
           EOF
           python3 /tmp/custom.py
-
-      - name: Configure
-        run: scripts/configure-ios.sh --device
 
       - name: Build
         run: scripts/build-ios.sh --device
